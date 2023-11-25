@@ -1,6 +1,5 @@
 from z3 import *
 
-
 # In Exercise 1, we've learned how to use z3 to obtain the solutions that
 # satisfy a given proposition.
 # We must point out that the validity of Z3 is capable to prove
@@ -32,13 +31,18 @@ solve(Not(F))
 # Exercise 2-1:
 # Now it's your turn, try to prove the exclusive middle law if also valid:
 # P \/ ~P
-raise NotImplementedError('TODO: Your code here!') 
-
+# raise NotImplementedError('TODO: Your code here!')
+P = Bool('P')
+F = Or(P, Not(P))
+solve(Not(F))
 
 # Exercise 2-2:
 # Prove the validity of the Pierce's law:
 # ((P->Q)->P)->P)
-raise NotImplementedError('TODO: Your code here!') 
+# raise NotImplementedError('TODO: Your code here!')
+P, Q = Bools('P Q')
+F = Implies(Implies(Implies(P, Q), P), P)
+solve(Not(F))
 
 # Note that the Pierce's law only holds in classical logic, but
 # not in constructive logic, for
@@ -49,8 +53,10 @@ raise NotImplementedError('TODO: Your code here!')
 # In previous exercise about use Coq, we ever give you an challenge
 # (P -> Q) -> (~Q -> ~P).
 # Now try to prove it's valid via z3
-raise NotImplementedError('TODO: Your code here!') 
-
+# raise NotImplementedError('TODO: Your code here!')
+P, Q = Bools('P Q')
+F = Implies(Implies(P, Q), Implies(Not(Q), Not(P)))
+solve(Not(F))
 
 # Exercise 2-4:
 # Once more, try to prove that validity of :
@@ -58,6 +64,9 @@ raise NotImplementedError('TODO: Your code here!')
 # Be carefully when you process the priority of operations cause
 # there is no intros. which can process it automatically for you
 # to use.
-raise NotImplementedError('TODO: Your code here!') 
+# raise NotImplementedError('TODO: Your code here!')
+P, Q, R = Bools('P Q R')
+F = Implies(Implies(P, And(Q, R)), And(Implies(P, Q), Implies(P, R)))
+solve(Not(F))
 
 # Well done, you complete Exercise 2, remember to save your src for handing in.

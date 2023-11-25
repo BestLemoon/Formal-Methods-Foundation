@@ -1,0 +1,69 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="myValues">
+        <value>
+          <list size="1">
+            <item index="0" class="java.lang.String" itemvalue="autocorrect" />
+          </list>
+        </value>
+      </option>
+      <option name="myCustomValuesEnabled" value="true" />
+    </inspection_tool>
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="27">
+            <item index="0" class="java.lang.String" itemvalue="lxml" />
+            <item index="1" class="java.lang.String" itemvalue="requests" />
+            <item index="2" class="java.lang.String" itemvalue="pandas" />
+            <item index="3" class="java.lang.String" itemvalue="nltk" />
+            <item index="4" class="java.lang.String" itemvalue="scikit_learn" />
+            <item index="5" class="java.lang.String" itemvalue="matplotlib" />
+            <item index="6" class="java.lang.String" itemvalue="plotly" />
+            <item index="7" class="java.lang.String" itemvalue="numpy" />
+            <item index="8" class="java.lang.String" itemvalue="tqdm" />
+            <item index="9" class="java.lang.String" itemvalue="keras" />
+            <item index="10" class="java.lang.String" itemvalue="keras_preprocessing" />
+            <item index="11" class="java.lang.String" itemvalue="transformers" />
+            <item index="12" class="java.lang.String" itemvalue="tb-nightly" />
+            <item index="13" class="java.lang.String" itemvalue="sklearn" />
+            <item index="14" class="java.lang.String" itemvalue="thulac" />
+            <item index="15" class="java.lang.String" itemvalue="aiocqhttp" />
+            <item index="16" class="java.lang.String" itemvalue="nonebot" />
+            <item index="17" class="java.lang.String" itemvalue="config" />
+            <item index="18" class="java.lang.String" itemvalue="gensim" />
+            <item index="19" class="java.lang.String" itemvalue="spacy" />
+            <item index="20" class="java.lang.String" itemvalue="pyhanlp" />
+            <item index="21" class="java.lang.String" itemvalue="en-core-web-sm" />
+            <item index="22" class="java.lang.String" itemvalue="scikit-learn" />
+            <item index="23" class="java.lang.String" itemvalue="sentencepiece" />
+            <item index="24" class="java.lang.String" itemvalue="torch" />
+            <item index="25" class="java.lang.String" itemvalue="sacrebleu" />
+            <item index="26" class="java.lang.String" itemvalue="torchvision" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N801" />
+          <option value="N806" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="str.__setitem__" />
+          <option value="dict.__setitem__" />
+          <option value="typing.Iterator.*" />
+          <option value="list.__getitem__" />
+          <option value="dict.find" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

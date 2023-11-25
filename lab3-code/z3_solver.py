@@ -9,7 +9,6 @@ solvers, and by introducing Z3, we hope you will have a
 general understanding of what such solvers look like, and
 what they can do."""
 
-
 from z3 import *
 
 ########################################
@@ -63,15 +62,18 @@ solve(F)
 #
 # Exercise 1-1:
 # Try to find solution that satisfies proposition: (P /\ Q) \/ R
-raise NotImplementedError('TODO: Your code here!') 
-
-
+# raise NotImplementedError('TODO: Your code here!')
+print(r"Exercise 1-1: (P /\ Q) \/ R")
+P, Q, R = Bools('P Q R')
+F = Or(And(P, Q), R)
+solve(F)
 # Exercise 1-2:
 # Try to find solution that satisfies proposition: P \/ (Q \/ R)
-raise NotImplementedError('TODO: Your code here!') 
-
-
-
+# raise NotImplementedError('TODO: Your code here!')
+print(r"Exercise 1-2: P \/ (Q \/ R)")
+P, Q, R = Bools('P Q R')
+F = Or(P, Or(Q, R))
+solve(F)
 ###########################################################
 # In Exercise 1-1 you've see the basic usage of z3 for describing propositions.
 # Like And, Or, Not. Also how to use the solve method to get the solution.
@@ -91,14 +93,19 @@ solve(F)
 # Exercise 1-3:
 # Consider proposition (P \/ Q) /\ (Q /\ R) /\ (P /\ ~R). Complete below src,
 # Z3 will show you that no solution can satisfy it.
-raise NotImplementedError('TODO: Your code here!') 
-
-
+# raise NotImplementedError('TODO: Your code here!')
+print(r"Exercise 1-3: (P \/ Q) /\ (Q /\ R) /\ (P /\ ~R)")
+P, Q, R = Bools('P Q R')
+F = And(Or(P, Q), And(Q, R), And(P, Not(R)))
+solve(F)
 # Exercise 1-4
 # Try to solve proposition
 # (P /\ ~S /\ R) /\ (R /\ ( ~P \/ (S /\ ~Q)))
-raise NotImplementedError('TODO: Your code here!') 
-
+# raise NotImplementedError('TODO: Your code here!')
+print(r"Exercise 1-4: (P /\ ~S /\ R) /\ (R /\ ( ~P \/ (S /\ ~Q)))")
+P, Q, R, S = Bools('P Q R S')
+F = And(And(P, Not(S), R), And(R, Or(Not(P), And(S, Not(Q)))))
+solve(F)
 ###########################################################
 # You may notice that some problems in Exercise 1 has more than one solutions
 # that satisfy it, but the solve method only provider you 1 solution.
@@ -110,7 +117,7 @@ raise NotImplementedError('TODO: Your code here!')
 # By default, Z3 only outputs the one row in
 # the truth table:
 """
-  P    Q     P\/Q
+  P    Q     P\\/Q
   t    t     t
   t    f     t
   f    t     t
@@ -159,8 +166,11 @@ solve(F)
 # Now you have know how to add constraint to solver to get different solutions
 # from z3. Try to get **all solutions** that satisfy the proposition in
 # Exercise 1-1: (P /\ Q) \/ R
-raise NotImplementedError('TODO: Your code here!') 
-
+# raise NotImplementedError('TODO: Your code here!')
+print(r"Exercise 1-5: (P /\ Q) \/ R")
+P, Q, R = Bools('P Q R')
+F = Or(And(P, Q), R)
+solve(F)
 
 # We can automate the above process, for this, we should expose
 # more internal capability of Z3. Consider our first example again:
@@ -225,8 +235,8 @@ def sat_all(props, f):
                 new_prop = Not(prop)
 
             block.append(new_prop)
-
-        raise NotImplementedError('TODO: Your code here!') 
+        solver.add(Or(block))
+        # raise NotImplementedError('TODO: Your code here!')
 
     print("the given proposition: ", f)
     print("the number of solutions: ", len(result))
