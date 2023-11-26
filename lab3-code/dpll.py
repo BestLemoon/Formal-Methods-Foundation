@@ -134,6 +134,7 @@ def ie(prop: Prop) -> Prop:
         case _:
             return prop
 
+
 # Exercise 3-3: try to implement the `nnf()` method to convert the
 # proposition to nnf, as we've discussed in the class.
 # recall the conversion rules:
@@ -183,18 +184,23 @@ def cnf(nnf_prop: Prop) -> Prop:
         # raise NotImplementedError('TODO: Your code here!')
         match left:
             case PAnd(left_left, left_right):
-                return cnf_d(left_left, cnf_d(left_right, right))
+                return PAnd(cnf_d(left_left, right), cnf_d(left_right, right))
             case _:
                 match right:
                     case PAnd(right_left, right_right):
-                        return cnf_d(cnf_d(left, right_left), right_right)
+                        return PAnd(cnf_d(left, right_left), cnf_d(left, right_right))
                     case _:
                         return POr(left, right)
+
     match nnf_prop:
         case PAnd(left, right):
             return PAnd(cnf(left), cnf(right))
         case POr(left, right):
             return cnf_d(cnf(left), cnf(right))
+        case PNot(p):
+            return PNot(cnf(p))
+        case PVar(p):
+            return p
         case _:
             return nnf_prop
 
@@ -224,6 +230,8 @@ def flatten(cnf_prop: Prop) -> List[List[Prop]]:
         match prop:
             case POr(left, right):
                 return get_atom_from_disjunction(left) + get_atom_from_disjunction(right)
+            case PVar(prop):
+                return [prop]
             case _:
                 return [prop]
 
@@ -249,7 +257,7 @@ def dpll(prop: Prop) -> dict:
     # output "unsat" if there is no solution
     #
     # feel free to add new method.
-    raise NotImplementedError('TODO: Your code here!')
+    # raise NotImplementedError('TODO: Your code here!')
 
 
 #####################
@@ -293,7 +301,10 @@ class TestDpll(unittest.TestCase):
                          "(((~p1 \\/ ~p3) /\\ (~p1 \\/ p4)) /\\ ((p2 \\/ ~p3) /\\ (p2 \\/ p4)))")
 
     def test_cnf_flatten_1(self):
-        test_1_flatten = flatten(cnf(nnf(ie(test_prop_1))))
+        a = ie(test_prop_1)
+        b = nnf(a)
+        c = cnf(b)
+        test_1_flatten = flatten(c)
         self.assertEqual(str(test_1_flatten), "[[~p, ~q, p]]")
 
     def test_cnf_flatten_2(self):

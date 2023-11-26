@@ -123,16 +123,16 @@ solve(F)
   f    t     t
   f    f     f
 """
-# After all, we're asking Z3 about the satisfiability of the proposition,
+# after all, we're asking z3 about the satisfiability of the proposition,
 # so one row of evidence is enough.
 
-# What if we want Z3 to output all the assignment of propositions
+# what if we want z3 to output all the assignment of propositions
 # that make the proposition satisfiable, not just the first one.
-# For the above example, we want the all first 3 rows.
+# for the above example, we want the all first 3 rows.
 
-# Here is the trick: when we get an answer, we negate the
+# here is the trick: when we get an answer, we negate the
 # answer, make a conjunction with the original proposition,
-# then check the satisfiability again. For the above example:
+# then check the satisfiability again. for the above example:
 P, Q = Bools('P Q')
 F = Or(P, Q)
 solve(F)
@@ -141,18 +141,21 @@ solve(F)
 
 # we want to build this:
 F = And(F, Not(And(P, Not(Q))))
+print(F)
 solve(F)
 # Z3 output this:
 # [P = False, Q = True]
 
 # continue the building process:
 F = And(F, Not(And(Not(P), Q)))
+print(F)
 solve(F)
 # Z3 output this:
 # [P = True, Q = True]
 
 # continue the building process:
 F = And(F, Not(And(P, Q)))
+print(F)
 solve(F)
 # Z3 output this:
 # "no solution"
@@ -171,7 +174,17 @@ print(r"Exercise 1-5: (P /\ Q) \/ R")
 P, Q, R = Bools('P Q R')
 F = Or(And(P, Q), R)
 solve(F)
-
+F = And(F, Not(And(P, Q, Not(R))))
+solve(F)
+F = And(F, Not(And(P, Q, R)))
+solve(F)
+F = And(F, Not(And(R, Not(Q), Not(P))))
+solve(F)
+F = And(F, Not(And(P, R, Not(Q))))
+solve(F)
+F = And(F, Not(And(Not(P), Q, R)))
+solve(F)
+print(r"Exercise 1-5: Finish")
 # We can automate the above process, for this, we should expose
 # more internal capability of Z3. Consider our first example again:
 # P /\ Q
@@ -226,16 +239,16 @@ def sat_all(props, f):
         m = solver.model()
         result.append(m)
         block = []
+        # Save all prop in True
         for prop in props:
             prop_is_true = m.eval(prop, model_completion=True)
-
+            # Judge each prop in m is True or False
             if prop_is_true:
                 new_prop = prop
             else:
                 new_prop = Not(prop)
-
             block.append(new_prop)
-        solver.add(Or(block))
+        solver.add(And(f, Not(And(block))))
         # raise NotImplementedError('TODO: Your code here!')
 
     print("the given proposition: ", f)
