@@ -301,14 +301,13 @@ class TestDpll(unittest.TestCase):
                          "(((~p1 \\/ ~p3) /\\ (~p1 \\/ p4)) /\\ ((p2 \\/ ~p3) /\\ (p2 \\/ p4)))")
 
     def test_cnf_flatten_1(self):
-        a = ie(test_prop_1)
-        b = nnf(a)
-        c = cnf(b)
-        test_1_flatten = flatten(c)
+        test_1_flatten = flatten(cnf(nnf(ie(test_prop_1))))
+        raise NotImplementedError('TODO: ERROR in output string!')
         self.assertEqual(str(test_1_flatten), "[[~p, ~q, p]]")
 
     def test_cnf_flatten_2(self):
         test_2_flatten = flatten(cnf(nnf(ie(test_prop_2))))
+        raise NotImplementedError('TODO: ERROR in output string!')
         self.assertEqual(str(test_2_flatten), "[[~p1, ~p3], [~p1, p4], [p2, ~p3], [p2, p4]]")
 
     def test_dpll_1(self):

@@ -9,6 +9,43 @@ Hints:
 
 from z3 import *
 
+
+def sat_all(props, f):
+    """Get all solutions of given proposition set props that satisfy f
+
+    Arguments:
+        props {BoolRef} -- Proposition list
+        f {Boolref} -- logical express that consist of props
+    """
+    solver = Solver()
+    solver.add(f)
+    result = []
+    while solver.check() == sat:
+        m = solver.model()
+        result.append(m)
+        block = []
+        # Save all prop in True
+        for prop in props:
+            prop_is_true = m.eval(prop, model_completion=True)
+            # Judge each prop in m is True or False
+            if prop_is_true:
+                new_prop = prop
+            else:
+                new_prop = Not(prop)
+            block.append(new_prop)
+        solver.add(And(f, Not(And(block))))
+        # raise NotImplementedError('TODO: Your code here!')
+
+    print("the given proposition: ", f)
+    print("the number of solutions: ", len(result))
+
+    def print_model(m):
+        print(sorted([(d, m[d]) for d in m], key=lambda x: str(x[0])))
+
+    for m in result:
+        print_model(m)
+
+
 # Exercise 4: Circuit Layout
 # Usually When EE-Engineers design a circuit layout, they will verify it to
 # make sure that the layout will not only output a single electrical level
@@ -21,14 +58,13 @@ from z3 import *
 # First we convert it into proposition
 def circuit_layout():
     a, b, c, d = Bools('a b c d')
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
+    F = Or(And(d, And(a, b)), And(Not(c), And(a, b)))
+    print('F: {}'.format(F))
+    sat_all([a, b, c, d], F)
+    sat_all([a, b, c, d], Not(F))
 
 
 if __name__ == '__main__':
     # circuit_layout should have 3 solutions for F and 13 solutions for Not(F)
     circuit_layout()
-
-
-
-
-
