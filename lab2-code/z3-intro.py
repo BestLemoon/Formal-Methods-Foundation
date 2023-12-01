@@ -182,6 +182,7 @@ F2 = And(ForAll(x, P(x)), ForAll(x, Q(x)))
 F = And(Implies(F1, F2), Implies(F2, F1))
 print(F)
 pretty_print(F)
+solve(F)
 prove(F)
 
 # exercise 10 : ∃x.(¬P(x) \/ Q(x)) -> ∃x.(¬(P(x) /\ ¬Q(x)))
@@ -283,3 +284,9 @@ prove(F)
 # Please prove that integers 9, 25, and 99 are odd numbers.
 
 # raise NotImplementedError('TODO: Your code here!')
+x = Int('x')
+Odd = Function('Odd', isort, bsort)
+O1 = Odd(1)
+Oss = ForAll(x, Implies(Odd(x), Odd(x + 2)))
+F = Implies(And(O1, Oss), And(Odd(9), And(Odd(25), Odd(99))))
+prove(F)
