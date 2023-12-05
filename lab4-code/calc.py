@@ -5,7 +5,6 @@ from z3 import *
 
 from counter import counter
 
-
 ##################################
 # The abstract syntax for the Calc language:
 '''
@@ -21,23 +20,31 @@ F   ::= f(x1, ..., xn){S;* return E;}
 @dataclass
 class Exp:
     pass
+
+
 @dataclass
 class ExpVar(Exp):
     var: str
+
+
 @dataclass
 class ExpBop(Exp):
     left: Exp
     right: Exp
-    bop: str    # "+", "-", "*", "/"
+    bop: str  # "+", "-", "*", "/"
+
 
 # statement
 @dataclass
 class Stm:
     pass
+
+
 @dataclass
 class StmAssign(Stm):
     var: str
     exp: Exp
+
 
 # function:
 @dataclass
@@ -47,22 +54,37 @@ class Function:
     stms: List[Stm]
     ret: Exp
 
+
 ###############################################
 # to pretty print a program
 def pp_exp(e: Exp):
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
+    match e:
+        case ExpVar(x):
+            return x
+        case ExpBop(left, right, bop):
+            return f"({pp_exp(left)} {bop} {pp_exp(right)})"
+
 
 def pp_stm(s: Stm):
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
+    match s:
+        case StmAssign(x, e):
+            print(f"{x} = {pp_exp(e)};")
+
 
 def pp_func(f):
     match f:
         case Function(name, args, stms, ret):
-            raise NotImplementedError('TODO: Your code here!') 
+            # raise NotImplementedError('TODO: Your code here!')
+            print(f"{name}({', '.join(args)})")
+            for stm in stms:
+                pp_stm(stm)
+            print(f"return {pp_exp(ret)};")
+
 
 def pp(f: Function):
     pp_func(f)
-
 
 
 ###############################################
@@ -77,6 +99,7 @@ def to_ssa_exp(exp: Exp, var_map) -> Exp:
                           to_ssa_exp(right, var_map),
                           bop)
 
+
 # convert statement:
 def to_ssa_stm(s: Stm, var_map, fresh_var) -> Stm:
     match s:
@@ -85,6 +108,7 @@ def to_ssa_stm(s: Stm, var_map, fresh_var) -> Stm:
             new_var = next(fresh_var)
             var_map[x] = new_var
             return StmAssign(new_var, new_exp)
+
 
 # take a function 'func', convert it to SSA
 def to_ssa_func(f: Function) -> Function:
@@ -117,6 +141,7 @@ def gen_cons_exp(exp: Exp) -> BoolRef:
                                DeclareSort('S'),
                                DeclareSort('S')).__call__(left, right)
 
+
 # generate constraint for statements:
 def gen_cons_stm(s: Stm) -> BoolRef:
     match s:
@@ -135,8 +160,8 @@ def gen_cons_func(f) -> List[BoolRef]:
 sample_f = Function('f',
                     ['s1', 's2', 't1', 't2'],
                     [StmAssign('z', ExpBop(ExpBop(ExpVar('s1'), ExpVar('t1'), "+"),
-                                                      ExpBop(ExpVar('s2'), ExpVar('t2'), "+"),
-                                                      "*")),
+                                           ExpBop(ExpVar('s2'), ExpVar('t2'), "+"),
+                                           "*")),
                      StmAssign('z', ExpBop(ExpVar('z'), ExpVar('s1'), "*"))],
                     ExpVar('z'))
 
@@ -149,4 +174,3 @@ if __name__ == '__main__':
     pp_func(new_f)
     # generate and print Z3 constraints
     print(gen_cons_func(new_f))
-

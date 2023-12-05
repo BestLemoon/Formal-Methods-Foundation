@@ -1,11 +1,9 @@
-from typing import List
-import unittest
 from dataclasses import dataclass
+from typing import List
 
 from z3 import *
 
 from counter import counter
-
 
 ##################################
 # The abstract syntax for the Tac (three address code) language:
@@ -14,27 +12,36 @@ S ::= x=y | x=y+z | x=y-z | x=y*z | x=y/z
 F ::= f(x1, ..., xn){S;* return x;}
 """
 
+
 # expression
 @dataclass
 class Exp:
     pass
+
+
 @dataclass
 class ExpVar(Exp):
     x: str
+
+
 @dataclass
 class ExpBop(Exp):
     x: str
     y: str
     bop: str
 
+
 # statement
 @dataclass
 class Stm:
     pass
+
+
 @dataclass
 class StmAssign(Stm):
     x: str
     e: Exp
+
 
 # function:
 @dataclass
@@ -44,16 +51,34 @@ class Function:
     stms: List[Stm]
     ret: str
 
+
 ###############################################
 # pretty printer
 def pp_exp(e: Exp):
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
+    match e:
+        case ExpVar(x):
+            return x
+        case ExpBop(x, y, bop):
+            return f"{x} {bop} {y}"
+
 
 def pp_stm(s: Stm):
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
+    match s:
+        case StmAssign(x, e):
+            print(f"\t{x} = {pp_exp(e)};")
+
 
 def pp_func(f: Function):
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
+    match f:
+        case Function(name, args, stms, ret):
+            print(f"{name}({', '.join(args)}){{")
+            for stm in stms:
+                pp_stm(stm)
+            print(f"\treturn {ret};")
+            print("}")
 
 
 ###############################################
@@ -61,11 +86,23 @@ def pp_func(f: Function):
 
 # Exercise 7: Finish the SSA conversion function `to_ssa_stmt()`
 # take a function 'f', convert it to SSA
-def to_ssa_exp(e: Exp, var_map, fresh_var) -> Exp:
-    raise NotImplementedError('TODO: Your code here!') 
+def to_ssa_exp(e: Exp, var_map) -> Exp:
+    # raise NotImplementedError('TODO: Your code here!')
+    match e:
+        case ExpVar(x):
+            return ExpVar(var_map[x])
+        case ExpBop(x, y, bop):
+            return ExpBop(var_map[x], var_map[y], bop)
+
 
 def to_ssa_stm(s: Stm, var_map, fresh_var) -> Stm:
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
+    match s:
+        case StmAssign(x, e):
+            new_e = to_ssa_exp(e, var_map)
+            var_map[x] = next(fresh_var)
+            return StmAssign(var_map[x], new_e)
+
 
 def to_ssa_func(f: Function) -> Function:
     var_map = {arg: arg for arg in f.args}
@@ -75,9 +112,6 @@ def to_ssa_func(f: Function) -> Function:
                     f.args,
                     new_stmts,
                     var_map[f.ret])
-    
-
-    
 
 
 ###############################################
@@ -85,16 +119,28 @@ def to_ssa_func(f: Function) -> Function:
 # constraints form TAC statements
 # Generate Z3 constraints:
 def gen_con_exp(e: Exp) -> BoolRef:
-    raise NotImplementedError('TODO: Your code here!') 
+    bop_map = {"+": "add", "-": "sub", "*": "mul", "/": "div"}
+    match e:
+        case ExpVar(x):
+            return Const(x, DeclareSort('S'))
+        case ExpBop(x, y, bop):
+            func_name = 'f_' + bop_map[bop]
+            x = gen_con_exp(ExpVar(x) if isinstance(x, str) else x)
+            y = gen_con_exp(ExpVar(y) if isinstance(y, str) else y)
+            return z3.Function(func_name, DeclareSort('S'), DeclareSort('S'), DeclareSort('S'))(x, y)
+
 
 def gen_cons_stm(s: Stm) -> BoolRef:
-    raise NotImplementedError('TODO: Your code here!') 
+    match s:
+        case StmAssign(x, e):
+            return Const(x, DeclareSort('S')).__eq__(gen_con_exp(e))
 
 
 # Exercise 8-2: Finished the `gen_cons_stmt` function to 
 # generate constraints form TAC function 
 def gen_cons_func(func: Function) -> List[BoolRef]:
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
+    return [gen_cons_stm(stm) for stm in func.stms]
 
 
 ###############################################
@@ -109,7 +155,6 @@ test_case = Function('f',
                       StmAssign('z', ExpVar('b'))],
                      'z')
 
-
 if __name__ == '__main__':
     # should print: 
     # f(s1, s2, t1, t2){
@@ -121,7 +166,7 @@ if __name__ == '__main__':
     #   return z;
     # }
     pp_func(test_case)
-    
+
     ssa = to_ssa_func(test_case)
     # should print:
     # f(s1, s2, t1, t2){
@@ -133,9 +178,9 @@ if __name__ == '__main__':
     #   return _tac_f_4;
     # }
     pp_func(ssa)
-    
+
     cons = gen_cons_func(ssa)
-    
+
     # should has constraints:
     # [_tac_f_0 == f_add(s1, t1),
     #  _tac_f_1 == f_add(s2, t2),

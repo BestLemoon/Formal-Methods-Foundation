@@ -1,5 +1,5 @@
-from typing import List
 import unittest
+from typing import List
 
 from z3 import *
 
@@ -17,7 +17,17 @@ def compile_func(f: calc.Function) -> tac.Function:
     # Exercise 9: Finish the compiler implementation by filling in the 
     # missing code in compile_exp()
     def compile_exp(e: calc.Exp) -> str:
-        raise NotImplementedError('TODO: Your code here!') 
+        # raise NotImplementedError('TODO: Your code here!')
+        match e:
+            case calc.ExpVar(x):
+                return x
+            case calc.ExpBop(e1, e2, bop):
+                y1 = compile_exp(e1)
+                y2 = compile_exp(e2)
+                new_var = next(fresh_var)
+                new_s = tac.StmAssign(new_var, tac.ExpBop(y1, y2, bop))
+                tac_stms.append(new_s)
+                return new_var
 
     def compile_stm(s: calc.Stm):
         match s:
@@ -45,8 +55,10 @@ def translation_validation(calc_func: calc.Function, tac_func: tac.Function) -> 
     tac_cons: List[BoolRef] = tac.gen_cons_func(tac_func_ssa)
 
     solver = Solver()
+    solver.add(z3.And(calc_cons + tac_cons))
+    solver.add(calc_func_ssa.ret == tac_func_ssa.ret)
 
-    raise NotImplementedError('TODO: Your code here!') 
+    # raise NotImplementedError('TODO: Your code here!')
     return solver
 
 
@@ -55,7 +67,6 @@ def translation_validation(calc_func: calc.Function, tac_func: tac.Function) -> 
 
 
 class TestTV(unittest.TestCase):
-
     tac_func = compile_func(calc.sample_f)
 
     def test_compile(self):
@@ -72,7 +83,8 @@ class TestTV(unittest.TestCase):
         #   _tac_f_5 = _tac_f_4;
         #   return _tac_f_5;
         # }
-        # self.assertEqual(str(tac.to_ssa_func(self.tac_func)), res)
+        # Function cannot equal with a string. There's need to convert to string using pp_func.
+        self.assertEqual(str(tac.to_ssa_func(self.tac_func)), res)
 
     def test_tv(self):
         solver = translation_validation(calc.sample_f, self.tac_func)

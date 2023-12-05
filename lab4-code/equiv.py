@@ -1,6 +1,5 @@
 from z3 import *
 
-
 # program equivalence:
 # in the class, we present two implementation of the same algorithms, one
 # is:
@@ -31,5 +30,14 @@ int power3_new(int in){
 # Please construct, manually, the propositions P1 and P2, and let Z3
 # prove the above implication. (Note that you don't need to generate
 # P1 or P2 automatically, just write down them manually.)
-raise NotImplementedError('TODO: Your code here!') 
+# raise NotImplementedError('TODO: Your code here!')
+in_var = Int('in')
+out_a = Int('out_a')
+out_b = Int('out_b')
 
+P1 = out_a == in_var * in_var * in_var
+P2 = out_b == (in_var * in_var) * in_var
+
+s = Solver()
+s.add(P1, P2, Not(out_a == out_b))
+print(s.check())
