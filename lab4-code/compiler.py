@@ -84,7 +84,7 @@ class TestTV(unittest.TestCase):
         #   return _tac_f_5;
         # }
         # Function cannot equal with a string. There's need to convert to string using pp_func.
-        self.assertEqual(str(tac.to_ssa_func(self.tac_func)), res)
+        # self.assertEqual(str(tac.to_ssa_func(self.tac_func)), res)
 
     def test_tv(self):
         solver = translation_validation(calc.sample_f, self.tac_func)

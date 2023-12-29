@@ -2,12 +2,6 @@ import re
 
 from z3 import *
 
-# class test
-x, y, z = BitVecs('x y z', 8)
-solve(x == 1, y == 3, x & y == 1)
-solve(x - y > 0, x < y)
-solve(x * x * x + y * y * y == z * z * z)
-print("=" * 20)
 # In this part of the assignment, you'll be familiarizing
 # yourself with the theory to reason about bit vectors.
 
@@ -39,7 +33,13 @@ else:
 # BitVecVal(1, 32)   :  1
 # BitVecVal(-1, 32)  :  2
 def count_one_in_bit_vector(x):
-    raise NotImplementedError('TODO: Your code here!')
+    # raise NotImplementedError('TODO: Your code here!')
+    bitvecs_lenth = x.size()
+    count = 0
+    for i in range(bitvecs_lenth):
+        if simplify(Extract(i, i, x) == BitVecVal(1, 1)):
+            count += 1
+    return count
 
 
 def check_count():
@@ -94,7 +94,8 @@ check_count()
 
 # Given two bit vectors, to compute their average:
 def int_average_v1(x, y):
-    raise NotImplementedError('TODO: Your code here!')
+    # raise NotImplementedError('TODO: Your code here!')
+    return (x + y) / 2
 
 
 # To compute the correct result of integer average, we've
@@ -146,7 +147,8 @@ def check_average(f, is_non_negative):
 
 # @Exercise 4: To check whether or not the above function is correct.
 # Does Z3 complain? Why or why not?
-raise NotImplementedError('TODO: Your code here!')
+# raise NotImplementedError('TODO: Your code here!')
+
 check_average(int_average_v1, True)
 
 
@@ -174,7 +176,7 @@ check_average(int_average_v1, True)
 # you can draw from this src.
 
 def invoke_java_int_average():
-    arr = re.findall("\d+", str(result))
+    arr = re.findall(r"\d+", str(result))
     if not arr:
         return
     x = arr[0]
@@ -201,7 +203,8 @@ check_average(int_average_v2, False)
 #
 # @exercise 7: Complete the missing part to implement it.
 def int_average_v3(x, y):
-    raise NotImplementedError('TODO: Your code here!')
+    # raise NotImplementedError('TODO: Your code here!')
+    return (x + y) >> 1
 
 
 check_average(int_average_v3, False)
@@ -223,7 +226,8 @@ check_average(int_average_v3, True)
 # Hacker's Delight book (page 9, section 2.5) by Henry S. Warren
 # (this is a very good book containing many delighting programming tricks).
 def int_average(x, y):
-    raise NotImplementedError('TODO: Your code here!')
+    # raise NotImplementedError('TODO: Your code here!')
+    return (x & y) + ((x ^ y) >> 1)
 
 
 check_average(int_average, False)
@@ -272,7 +276,15 @@ multi_overflow()
 # For instance, for x=1, y=2, return (False, 2).
 # for x=0x80000000, y=2, return (True, 0)
 def detect_multi_overflow(x, y):
-    raise NotImplementedError('TODO: Your code here!')
+    # Perform multiplication in a larger bit vector to check for overflow
+    extended_result = ZeroExt(32, x) * ZeroExt(32, y)
+    # The actual result within 32 bits
+    result = x * y
+    # Check for overflow: if the extended result is different from the result when truncated back to 32 bits
+    overflow = simplify(extended_result != ZeroExt(32, result))
+    # Return the overflow flag and the result
+    # If overflow occurred, the result is rounded (typically to 0)
+    return is_true(overflow), simplify(result)
 
 
 def check_multi():
@@ -313,9 +325,23 @@ def fermat_2(x, y, z):
 
 # Fermat's last theorem:
 # @Exercise 12: write a function for arbitrary n:
-def fermat(x, y, z, n):
-    raise NotImplementedError('TODO: Your code here!')
+def z3_pow(base, exp):
+    result = 1
+    for _ in range(exp):
+        result *= base
+    return result
 
+def fermat(x, y, z, n):
+    # raise NotImplementedError('TODO: Your code here!')
+    cons = []
+    cons.append(x & 0xffffff00 == 0)
+    cons.append(y & 0xffffff00 == 0)
+    cons.append(z & 0xffffff00 == 0)
+    cons.append(x != 0)
+    cons.append(y != 0)
+    cons.append(z != 0)
+    cons.append(z3_pow(x, n) + z3_pow(y, n) == z3_pow(z, n))
+    return cons
 
 def check_fermat():
     # check for n = 2

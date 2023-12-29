@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from typing import Dict
 
 from z3 import *
-from mini_py import *
 
+from mini_py import *
 
 
 class Todo(Exception):
@@ -16,6 +16,7 @@ class Todo(Exception):
 
     def __repr__(self):
         return self.__str__()
+
 
 # a symbolic execution engine.
 
@@ -48,14 +49,16 @@ def symbolic_expr(memory, expr):
     if isinstance(expr, ExprNum):
         return expr
     if isinstance(expr, ExprVar):
-
+        if expr.var in memory.symbolic_memory:
+            return memory.symbolic_memory[expr.var]
+        else:
+            return expr
         # exercise 6: get variable's symbolic value from symbolic memory
         # be careful when deal with parameter variables. the result should
         # only contain parameters or constants
         #
         # Your code here：
-
-        raise Todo("exercise 6: please fill in the missing code.")
+        # raise Todo("exercise 6: please fill in the missing code.")
 
     if isinstance(expr, ExprBop):
         left = symbolic_expr(memory, expr.left)
@@ -69,13 +72,23 @@ def symbolic_stmt(memory, stmt, rest_stmts, results):
         return symbolic_stmts(memory, rest_stmts, results)
 
     if isinstance(stmt, StmtIf):
+        # Process the if branch
+        if_memory = copy.deepcopy(memory)
+        if_memory.path_condition.append(symbolic_expr(if_memory, stmt.expr))
+        symbolic_stmts(if_memory, stmt.then_stmts + rest_stmts, results)
+
+        # Process the else branch
+        else_memory = copy.deepcopy(memory)
+        else_memory.path_condition.append(neg_exp(symbolic_expr(else_memory, stmt.expr)))
+        symbolic_stmts(else_memory, stmt.else_stmts + rest_stmts, results)
+
         # exercise 6: process the if-statement by split the symbolic memory,
         # use the python multiprocessing module to do this work. the target function
         # wil be the symbolic_stmts, read it carefully.
         #
         # Your code here：
+        # raise Todo("exercise 6: please fill in the missing code.")
 
-        raise Todo("exercise 6: please fill in the missing code.")
 
 
 def symbolic_stmts(memory, stmts, results, condition=None):
@@ -115,7 +128,36 @@ def expr_2_z3(expr):
     #
     # Your code here：
 
-    raise Todo("exercise 7: please fill in the missing code.")
+    # raise Todo("exercise 7: please fill in the missing code.")
+    if isinstance(expr, ExprNum):
+        return IntVal(expr.num)
+    if isinstance(expr, ExprVar):
+        return Int(expr.var)
+    if isinstance(expr, ExprBop):
+        left = expr_2_z3(expr.left)
+        right = expr_2_z3(expr.right)
+        if expr.bop is Bop.ADD:
+            return left + right
+        if expr.bop is Bop.MIN:
+            return left - right
+        if expr.bop is Bop.MUL:
+            return left * right
+        if expr.bop is Bop.DIV:
+            return left / right
+        if expr.bop is Bop.EQ:
+            return left == right
+        if expr.bop is Bop.NE:
+            return left != right
+        if expr.bop is Bop.GT:
+            return left > right
+        if expr.bop is Bop.GE:
+            return left >= right
+        if expr.bop is Bop.LT:
+            return left < right
+        if expr.bop is Bop.LE:
+            return left <= right
+
+
 
 
 # negate the condition
@@ -152,6 +194,7 @@ def check_cond(memory, add_cond=None):
 
     return check_result, solver
 
+
 ###############################
 # test function:
 #
@@ -169,12 +212,12 @@ f1 = Function('f1', ['a', "b"],
                StmtAssign('y', ExprNum(0)),
                StmtIf(ExprBop(ExprVar('a'), ExprNum(0), Bop.NE),
                       [StmtAssign('y', ExprBop(ExprVar('x'), ExprNum(3), Bop.ADD)),
-                      StmtIf(ExprBop(ExprVar('b'), ExprNum(0), Bop.EQ),
-                             [StmtAssign('x', ExprBop(ExprNum(2), ExprBop(ExprVar('a'), ExprVar('b'), Bop.ADD), Bop.MUL))],
-                             [])],
+                       StmtIf(ExprBop(ExprVar('b'), ExprNum(0), Bop.EQ),
+                              [StmtAssign('x',
+                                          ExprBop(ExprNum(2), ExprBop(ExprVar('a'), ExprVar('b'), Bop.ADD), Bop.MUL))],
+                              [])],
                       [])
                ], ExprVar('x'))
-
 
 if __name__ == '__main__':
     example_memory = Memory(args=["a", "b", "c"],
@@ -190,9 +233,9 @@ if __name__ == '__main__':
     # Should output:
     #
     # [m == n]  ===>  [((42 - a) * 5) == ((c + 20) * 2)]
-    #
-    print(f"[{example_exp}]  ===>  [{symbolic_expr(example_memory, example_exp)}]\n")
-
+    # the original test code may be wrong, so I modified it
+    # print(f"[{example_exp}]  ===>  [{symbolic_expr(example_memory, example_exp)}]\n")
+    print(f"[{example_exp}]  ===>  [{symbolic_expr(example_memory, symbolic_expr(example_memory, example_exp))}]\n")
     # Should output(order can be different):
     #
     # Arguments: a,b

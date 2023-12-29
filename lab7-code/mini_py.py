@@ -168,13 +168,15 @@ class Function:
             stmt.level += 1
 
         stmts_str = "".join([str(stmt) for stmt in self.stmts])
-
+        return (f"def {self.name}({arg_str}):\n"
+                f"{stmts_str}"
+                f"\treturn {self.ret}\n")
         # exercise 1: Finish the magic methods __str__() method to get the
         # desired code-printing result：
         #
         # Your code here：
 
-        raise Todo("exercise 1: please fill in the missing code.")
+        # raise Todo("exercise 1: please fill in the missing code.")
 
 
 ###############################################

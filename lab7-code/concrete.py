@@ -5,7 +5,6 @@ from typing import Dict
 from mini_py import *
 
 
-
 class Todo(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -15,6 +14,7 @@ class Todo(Exception):
 
     def __repr__(self):
         return self.__str__()
+
 
 # a concrete execution engine.
 
@@ -75,8 +75,18 @@ def interpret_stm(memory, stmt):
     # following the big-step operational semantics rules from the lecture note.
     #
     # Your code here：
+    if isinstance(stmt, StmtAssign):
+        memory.concrete_memory[stmt.var] = interpret_expr(memory, stmt.expr)
+    elif isinstance(stmt, StmtIf):
+        if interpret_expr(memory, stmt.expr):
+            interpret_stmts(memory, stmt.then_stmts)
+        else:
+            interpret_stmts(memory, stmt.else_stmts)
+    elif isinstance(stmt, StmtWhile):
+        while interpret_expr(memory, stmt.expr):
+            interpret_stmts(memory, stmt.stmts)
 
-    raise Todo("exercise 3: please fill in the missing code.")
+    # raise Todo("exercise 3: please fill in the missing code.")
     return memory
 
 
@@ -122,7 +132,6 @@ func_gcd = Function("gcd", ["m", "n"],
 
 class TestConcrete(unittest.TestCase):
     def test_interpret_exp(self):
-
         # 3 + 2 >= 3 * 2
         exp1 = ExprBop(ExprBop(ExprNum(3), ExprNum(2), Bop.ADD),
                        ExprBop(ExprNum(3), ExprNum(2), Bop.MUL),
@@ -151,4 +160,3 @@ class TestConcrete(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

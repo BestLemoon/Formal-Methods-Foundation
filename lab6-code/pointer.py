@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import unittest
+from dataclasses import dataclass
 
 from z3 import *
 
@@ -21,8 +21,8 @@ H = Function("H", IntSort(), IntSort())
 class Term:
     def __repr__(self):
         return self.__str__()
-    
-    
+
+
 # Expression based
 @dataclass(repr=False)
 class Expr:
@@ -50,7 +50,7 @@ class TAddE(Term):
 
 @dataclass(repr=False)
 class TAddr(Term):
-    var: TVar 
+    var: TVar
 
     def __str__(self):
         return f"&{self.var.name}"
@@ -75,11 +75,12 @@ class TStar(Term):
             return f"*({self.term})"
         return f"*{self.term}"
 
+
 @dataclass(repr=False)
 class TNull(Term):
     def __str__(self):
         return "NULL"
-    
+
 
 # Expressions
 @dataclass(repr=False)
@@ -202,18 +203,51 @@ class PAnd(Prop):
 def count_stars(prop: Prop):
     # @Exercise 17: finish the missing src in `count_stars()` methods,
     # make it can count amount of star symbols (*) in our pointer logic.
-    
+
     def term_count_stars(term: Term):
         # your src here
-        raise NotImplementedError('TODO: Your code here!') 
+        # raise NotImplementedError('TODO: Your code here!')
+        match term:
+            case TVar(_):
+                return 0
+            case TAddE(term, expr):
+                return term_count_stars(term) + expr_count_stars(expr)
+            case TAddr(_):
+                return 0
+            case TAddrStar(term):
+                return term_count_stars(term) + 1
+            case TStar(term):
+                return term_count_stars(term) + 1
+            case TNull():
+                return 0
 
     def expr_count_stars(expr: Expr):
         # your src here
-        raise NotImplementedError('TODO: Your code here!') 
+        # raise NotImplementedError('TODO: Your code here!')
+        match expr:
+            case EVar(_):
+                return 0
+            case EConst(_):
+                return 0
+            case EAdd(left, right):
+                return expr_count_stars(left) + expr_count_stars(right)
+            case EMinus(left, right):
+                return expr_count_stars(left) + expr_count_stars(right)
+            case EStar(term):
+                return term_count_stars(term) + 1
 
     def rel_count_stars(rel: Relation):
         # your src here
-        raise NotImplementedError('TODO: Your code here!') 
+        # raise NotImplementedError('TODO: Your code here!')
+        match rel:
+            case RTEq(left, right):
+                return term_count_stars(left) + term_count_stars(right)
+            case RTLe(left, right):
+                return term_count_stars(left) + term_count_stars(right)
+            case REEq(left, right):
+                return expr_count_stars(left) + expr_count_stars(right)
+            case RELe(left, right):
+                return expr_count_stars(left) + expr_count_stars(right)
 
     match prop:
         case PRel(rel) | PNot(rel):
@@ -225,6 +259,15 @@ def count_stars(prop: Prop):
 def to_z3(prop: Prop):
     # @Exercise 18: finish the missing src in `to_z3()` methods,
     # make it can translates pointer logic to z3's constraints.
+    # dirty implementation
+    var_map = {}
+
+    def get_var(name):
+        # If the variable is not in the map, create a new Z3 integer variable
+        if name not in var_map:
+            var_map[name] = Int(name)
+        # Return the Z3 variable
+        return var_map[name]
 
     def term_to_z3(term: Term):
         # rules to eliminate a pointer T
@@ -237,7 +280,20 @@ def to_z3(prop: Prop):
         # ⟦NULL⟧   =   0
         #
         # your src here
-        raise NotImplementedError('TODO: Your code here!') 
+        # raise NotImplementedError('TODO: Your code here!')
+        match term:
+            case TVar(name):
+                return H(S(get_var(name)))
+            case TAddE(term, expr):
+                return term_to_z3(term) + expr_to_z3(expr)
+            case TAddr(var):
+                return S(get_var(var.name))
+            case TAddrStar(term):
+                return term_to_z3(term)
+            case TStar(term):
+                return H(term_to_z3(term))
+            case TNull():
+                return 0
 
     def expr_to_z3(expr: Expr):
         # rules to eliminate an expression E
@@ -249,7 +305,18 @@ def to_z3(prop: Prop):
         # ⟦*T⟧     =   H(⟦T⟧)
         #
         # your src here
-        raise NotImplementedError('TODO: Your code here!') 
+        # raise NotImplementedError('TODO: Your code here!')
+        match expr:
+            case EConst(value):
+                return value
+            case EVar(name):
+                return H(S(get_var(name)))
+            case EAdd(left, right):
+                return expr_to_z3(left) + expr_to_z3(right)
+            case EMinus(left, right):
+                return expr_to_z3(left) - expr_to_z3(right)
+            case EStar(term):
+                return H(term_to_z3(term))
 
     def relation_to_z3(rel: Relation):
         # rules to eliminate a relation R
@@ -260,9 +327,18 @@ def to_z3(prop: Prop):
         # ⟦E < E⟧   =   ⟦E⟧ < ⟦E⟧
         #
         # your src here
-        raise NotImplementedError('TODO: Your code here!') 
+        # raise NotImplementedError('TODO: Your code here!')
+        match rel:
+            case RTEq(left, right):
+                return term_to_z3(left) == term_to_z3(right)
+            case RTLe(left, right):
+                return term_to_z3(left) < term_to_z3(right)
+            case REEq(left, right):
+                return expr_to_z3(left) == expr_to_z3(right)
+            case RELe(left, right):
+                return expr_to_z3(left) < expr_to_z3(right)
+        # rules to eliminate a proposition P
 
-    # rules to eliminate a proposition P
     #
     # ⟦R⟧      =   ⟦R⟧
     # ⟦~R⟧     =   ~⟦R⟧
@@ -288,7 +364,6 @@ p1 = PAnd(PRel(RTEq(TVar("p"),
           )
 
 p2 = PRel(REEq(EStar(TVar("p")), EConst(1)))
-
 
 p3 = PAnd(PRel(RTEq(TStar(TAddrStar(TVar("p"))),
                     TAddrStar(TStar(TVar("q"))))
@@ -318,7 +393,7 @@ class TestPointer(unittest.TestCase):
         solver = Solver()
         solver.add(Not(p))
         self.assertEqual(solver.check(), unsat)
-    
+
 
 if __name__ == '__main__':
     unittest.main()

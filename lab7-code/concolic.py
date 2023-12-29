@@ -3,11 +3,10 @@ from dataclasses import dataclass
 from typing import Dict
 
 from z3 import *
-from mini_py import *
 
-from symbolic import check_cond, neg_exp, symbolic_expr, f1
 from concrete import interpret_expr
-
+from mini_py import *
+from symbolic import check_cond, neg_exp, symbolic_expr, f1
 
 
 class Todo(Exception):
@@ -52,7 +51,11 @@ def concolic_stmt(memory, stmt):
         #
         # Your code here：
 
-        raise Todo("exercise 8: please fill in the missing code.")
+        # raise Todo("exercise 8: please fill in the missing code.")
+        memory.symbolic_memory[stmt.var] = symbolic_expr(memory, stmt.expr)
+        memory.concrete_memory[stmt.var] = interpret_expr(memory, stmt.expr)
+
+
 
     elif isinstance(stmt, StmtIf):
         # exercise 8: Deal with if-statement, recall that concolic execution will do the
@@ -60,7 +63,20 @@ def concolic_stmt(memory, stmt):
         #
         # Your code here：
 
-        raise Todo("exercise 8: please fill in the missing code.")
+        # raise Todo("exercise 8: please fill in the missing code.")
+        # Evaluate the condition
+        cond_value = interpret_expr(memory, stmt.expr)
+
+        # Add condition or its negation to path condition based on evaluation
+        if cond_value:
+            memory.path_condition.append(symbolic_expr(memory, stmt.expr))
+            concolic_stmts(memory, stmt.then_stmts)
+        else:
+            memory.path_condition.append(neg_exp(symbolic_expr(memory, stmt.expr)))
+            concolic_stmts(memory, stmt.else_stmts)
+
+
+
 
     elif isinstance(stmt, StmtWhile):
         # exercise 9: Process the while-statement, what you need to do is execute the
@@ -71,7 +87,10 @@ def concolic_stmt(memory, stmt):
         #
         # Your code here：
 
-        raise Todo("exercise 9: please fill in the missing code.")
+        # raise Todo("exercise 9: please fill in the missing code.")
+        while interpret_expr(memory, stmt.expr):
+            memory.path_condition.append(symbolic_expr(memory, stmt.expr))
+            concolic_stmts(memory, stmt.stmts)
 
     return memory
 

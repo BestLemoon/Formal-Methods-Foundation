@@ -1,7 +1,6 @@
 from z3 import *
 
 
-
 def array_test():
     # array is an array from integer to integer
     array = Array('A', IntSort(), IntSort())
@@ -10,12 +9,12 @@ def array_test():
     print(array[x])
     print(Select(array, x))
     print(Store(array, x, 10))
-    print(simplify(Select(Store(array, 2, x+1), 2)))
+    print(simplify(Select(array, x)))
+
 
 # @Exercise 13: read and run above src,
 # try to get familiarize yourself with the basic usage of Array in Z3py:
 # you do not need to write any src here.
-
 
 
 ##########################################################
@@ -27,16 +26,15 @@ def array_proof():
     value = Int('x')
     index = Int('i')
     solver = Solver()
-    
+
     # your src here
-    raise NotImplementedError('TODO: Your code here!') 
-    
+    # raise NotImplementedError('TODO: Your code here!')
+    solver.add(Store(array, index, value)[index] >= value)
     result = solver.check()
     if result == sat:
         return True, solver.model()
     else:
         return False, result
-    
 
 
 ##########################################################
@@ -50,16 +48,15 @@ def array_non_linear_proof():
     value = Int('x')
     index = Int('i')
     solver = Solver()
-    
+
     # your src here
-    raise NotImplementedError('TODO: Your code here!') 
-    
+    # raise NotImplementedError('TODO: Your code here!')
+    solver.add(Store(array, index * index - index * index, value)[0] >= value)
     result = solver.check()
     if result == sat:
         return True, solver.model()
     else:
         return False, result
-    
 
 
 ##########################################################
@@ -86,9 +83,10 @@ def lambda_array():
     def array_store(array, index, element):
         # @Exercise 16: write src to store an "element" into the
         # "index" position of "array" by using lambda expression.
-        raise NotImplementedError('TODO: Your code here!') 
+        # raise NotImplementedError('TODO: Your code here!')
+        return lambda x: element if x == index else array(x)
+        # a small test case
 
-    # a small test case
     arr = array_new()
     assert (array_select(array_store(array_store(arr, 5, 88),
                                      7, 99),
@@ -104,4 +102,3 @@ if __name__ == '__main__':
     array_proof()
     array_non_linear_proof()
     lambda_array()
-
